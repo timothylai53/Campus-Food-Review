@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Meal | Food Review</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-yellow-50 min-h-screen p-6">
+
+<h1 class="text-3xl font-bold text-yellow-600 mb-6">Search Meal 🍽️</h1>
+
+<div class="flex mb-4 space-x-2">
+  <input id="searchMeal" type="text" placeholder="Search Meal..." class="border p-2 rounded w-full">
+  <button id="searchBtn" class="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 transition">Search</button>
+</div>
+
+<div id="mealContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+
+<a href="home.html" class="inline-block mt-6 text-yellow-500 hover:underline">← Back to Home</a>
+
+<script>
+const mealContainer = document.getElementById("mealContainer");
+const searchBtn = document.getElementById("searchBtn");
+const searchMeal = document.getElementById("searchMeal");
+const currentUser = localStorage.getItem("currentUser");
+if(!currentUser) window.location.href="login.html";
+
+// Fetch meals
+function fetchMeals(query="chicken"){
+  fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`)
+    .then(res=>res.json())
+    .then(data=>{
+      mealContainer.innerHTML="";
+      const allReviews = JSON.parse(localStorage.getItem("reviews")) || [];
+
+      if(data.meals){
+        data.meals.forEach(meal=>{
+          // Cari rating untuk meal ni
+          const mealReviews = allReviews.filter(r => r.foodName === meal.strMeal);
+          let ratingDisplay = "No rating yet";
+          if(mealReviews.length > 0){
+            const avgRating = mealReviews.reduce((sum,r)=>sum+Number(r.rating),0)/mealReviews.length;
+            ratingDisplay = "⭐".repeat(Math.round(avgRating)) + ` (${mealReviews.length} review${mealReviews.length>1?'s':''})`;
+          }
+
+          const card = document.createElement("div");
+          card.className = "bg-white p-4 rounded-2xl shadow space-y-2";
+          card.innerHTML = `
+            <img src="${meal.strMealThumb}" class="rounded-lg w-full h-40 object-cover">
+            <h2 class="text-xl font-semibold text-yellow-600">${meal.strMeal}</h2>
+            <p class="text-gray-500">${meal.strCategory || "Unknown Category"}</p>
+            <p class="text-gray-700 font-semibold">Rating: ${ratingDisplay}</p>
+          `;
+          mealContainer.appendChild(card);
+        });
+      } else {
+        mealContainer.innerHTML="<p class='text-gray-500'>No meals found.</p>";
+      }
+    });
+}
+
+// Initial fetch
+fetchMeals();
+
+// Search
+searchBtn.addEventListener("click", ()=>fetchMeals(searchMeal.value));
+</script>
+
+</body>
+</html>

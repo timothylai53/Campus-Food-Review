@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Review | Food Review</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-yellow-50 min-h-screen p-6">
+
+<h1 class="text-3xl font-bold text-yellow-600 mb-6">Create Review 🍔</h1>
+
+<form id="reviewForm" class="space-y-4">
+  <input type="text" id="foodName" placeholder="Food Name" class="w-full p-2 border rounded-lg">
+  <textarea id="reviewText" placeholder="Your Review" class="w-full p-2 border rounded-lg"></textarea>
+  <label class="flex items-center space-x-2">
+    <span class="text-gray-700">Your Rating:</span>
+    <select id="rating" class="border p-1 rounded">
+      <option value="1">1 ⭐</option>
+      <option value="2">2 ⭐⭐</option>
+      <option value="3">3 ⭐⭐⭐</option>
+      <option value="4">4 ⭐⭐⭐⭐</option>
+      <option value="5">5 ⭐⭐⭐⭐⭐</option>
+    </select>
+  </label>
+  <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg transition">Submit Review</button>
+</form>
+
+<h2 class="text-2xl font-semibold mt-6 mb-2">Your Reviews:</h2>
+<div id="reviewsContainer" class="space-y-4"></div>
+
+<a href="home.html" class="inline-block mt-6 text-yellow-500 hover:underline">← Back to Home</a>
+
+<script>
+// Ensure user logged in
+const currentUser = localStorage.getItem("currentUser");
+if(!currentUser) window.location.href="login.html";
+
+// Load reviews
+function loadReviews(){
+  const reviews = JSON.parse(localStorage.getItem("reviews")) || [];
+  const container = document.getElementById("reviewsContainer");
+  container.innerHTML = "";
+  reviews.filter(r=>r.user===currentUser).forEach(r=>{
+    container.innerHTML += `
+      <div class="bg-white p-4 rounded-2xl shadow">
+        <h3 class="font-semibold text-yellow-600">${r.foodName} - ${"⭐".repeat(r.rating)}</h3>
+        <p class="text-gray-700">${r.text}</p>
+      </div>
+    `;
+  });
+}
+
+document.getElementById("reviewForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const foodName = document.getElementById("foodName").value.trim();
+  const text = document.getElementById("reviewText").value.trim();
+  const rating = document.getElementById("rating").value;
+
+  if(foodName && text){
+    const reviews = JSON.parse(localStorage.getItem("reviews")) || [];
+    reviews.push({user:currentUser,foodName,text,rating});
+    localStorage.setItem("reviews", JSON.stringify(reviews));
+    document.getElementById("reviewForm").reset();
+    loadReviews();
+  } else {
+    alert("Please fill all fields!");
+  }
+});
+
+loadReviews();
+</script>
+
+</body>
+</html>
