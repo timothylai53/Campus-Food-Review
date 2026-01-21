@@ -46,17 +46,30 @@ try {
         throw new Exception('Invalid review ID');
     }
 
-    // Check if review exists and get photo path
-    $check_sql = "SELECT review_id, photo_path FROM reviews WHERE review_id = ?";
+    // Check if review exists and get photo path, ensuring user owns it
+    $check_sql = "SELECT review_id, photo_path FROM reviews WHERE review_id = ? AND user_id = ?";
     $check_stmt = $conn->prepare($check_sql);
     
     if (!$check_stmt) {
         throw new Exception('Database error: ' . $conn->error);
     }
 
-    $check_stmt->bind_param('i', $review_id);
+    $current_user_id = $_SESSION['user_id'];
+    $check_stmt->bind_param('is', $review_id, $current_user_id);
     $check_stmt->execute();
     $result = $check_stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+         // Check if review exists but belongs to someone else
+         $exist_sql = "SELECT review_id FROM reviews WHERE review_id = ?";
+         $exist_stmt = $conn->prepare($exist_sql);
+         $exist_stmt->bind_param('i', $review_id);
+         $exist_stmt->execute();
+         if($exist_stmt->get_result()->num_rows > 0) {
+             throw new Exception('Unauthorized: You can only delete your own reviews');
+         }
+         throw new Exception('Review not found');
+    }
 
     if ($result->num_rows === 0) {
         throw new Exception('Review not found');

@@ -9,6 +9,11 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$current_user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : '';
+
 require_once 'db_connect.php';
 
 // Only accept GET requests
@@ -28,10 +33,13 @@ try {
     $search_param = '%' . $search_query . '%';
 
     // Prepare SQL query to search in food_name and restaurant_name
-    $sql = "SELECT review_id, restaurant_name, food_name, price, rating, review_date, photo_path 
-            FROM reviews 
-            WHERE food_name LIKE ? OR restaurant_name LIKE ?
-            ORDER BY review_date DESC, review_id DESC";
+    $sql = "SELECT r.review_id, r.restaurant_name, r.food_name, r.price, r.rating, r.review_date, r.photo_path,
+            (SELECT COUNT(*) FROM review_likes WHERE review_id = r.review_id) as likes_count,
+            (SELECT COUNT(*) FROM review_likes WHERE review_id = r.review_id AND user_id = ?) as is_liked,
+            (SELECT COUNT(*) FROM review_comments WHERE review_id = r.review_id) as comments_count
+            FROM reviews r
+            WHERE r.food_name LIKE ? OR r.restaurant_name LIKE ?
+            ORDER BY r.review_date DESC, r.review_id DESC";
     
     $stmt = $conn->prepare($sql);
 
@@ -39,7 +47,7 @@ try {
         throw new Exception('Database error: ' . $conn->error);
     }
 
-    $stmt->bind_param('ss', $search_param, $search_param);
+    $stmt->bind_param('sss', $current_user_id, $search_param, $search_param);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -54,7 +62,10 @@ try {
             'rating' => (int)$row['rating'],
             'review_date' => $row['review_date'],
             'photo_path' => $row['photo_path'],
-            'photo_url' => $row['photo_path'] ? 'uploads/' . $row['photo_path'] : null
+            'photo_url' => $row['photo_path'] ? 'uploads/' . $row['photo_path'] : null,
+            'likes_count' => (int)$row['likes_count'],
+            'is_liked' => (bool)$row['is_liked'],
+            'comments_count' => (int)$row['comments_count']
         ];
     }
 

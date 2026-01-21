@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reviews - UUM FoodHunt</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F97316">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#F97316', // Orange-500
+                        secondary: '#FDBA74', // Orange-300
+                    }
+                }
+            }
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .pb-safe-area-inset-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased pb-24">
+
+    <!-- Sticky Top Header -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm px-5 py-4 flex items-center gap-3 transition-all duration-300">
+        <a href="home.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-primary hover:bg-orange-50 transition-all active:scale-95">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h1 class="text-xl font-bold tracking-tight text-slate-900">My Reviews</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-5 mt-6 max-w-md mx-auto sm:max-w-xl md:max-w-2xl">
+        
+        <!-- Reviews Container -->
+        <div id="reviewsContainer" class="space-y-6">
+             <!-- Skeleton Loader -->
+            <div class="animate-pulse space-y-4">
+                <div class="h-48 bg-slate-200 rounded-2xl"></div>
+                <div class="h-48 bg-slate-200 rounded-2xl"></div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-20">
+             <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-50 text-primary mb-4 text-3xl shadow-sm">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">No reviews yet</h3>
+            <p class="text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">Share your first food experience with the campus community!</p>
+            <a href="create_review.html" class="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-orange-500/30 hover:shadow-orange-500/40 hover:-translate-y-1 active:scale-95 transition-all">
+                <i class="fa-solid fa-plus"></i> Write Review
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Fixed) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-50 rounded-t-[25px] pb-safe-area-inset-bottom">
+        <div class="flex justify-around items-end px-2 pb-3 pt-3">
+            
+            <!-- Home -->
+            <a href="home.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1 group-focus:scale-90">
+                    <i class="fa-solid fa-house text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+
+            <!-- Search -->
+            <a href="search_meal.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1 group-focus:scale-90">
+                    <i class="fa-solid fa-compass text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Explore</span>
+            </a>
+
+            <!-- FAB Button (Center) -->
+            <a href="create_review.html" class="relative -top-8 group">
+                <div class="w-16 h-16 bg-gradient-to-tr from-orange-500 to-rose-500 rounded-full shadow-xl shadow-orange-500/30 flex items-center justify-center text-white text-2xl transform transition-all duration-300 group-hover:scale-110 group-active:scale-95 border-[6px] border-slate-50">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </a>
+
+            <!-- Statistics -->
+            <a href="statistics.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1">
+                    <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Stats</span>
+            </a>
+
+            <!-- My Review (Active) -->
+             <a href="my_reviews.html" class="flex flex-col items-center gap-1 w-16 group">
+                <div class="relative p-1">
+                    <i class="fa-solid fa-user text-xl text-primary transition-colors duration-200"></i>
+                    <span class="absolute -bottom-2 lg:bottom-auto lg:top-1/2 lg:-left-2 w-1 h-1 bg-primary rounded-full mx-auto left-0 right-0"></span>
+                </div>
+                <span class="text-[10px] font-bold text-primary">My Review</span>
+            </a>
+
+        </div>
+    </nav>
+    
+    <!-- Safe Area Padding -->
+    <div class="h-20"></div>
+
+    <!-- Edit Modal (Redesigned) -->
+    <div id="editModal" class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="document.getElementById('editModal').classList.add('hidden')"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white w-full max-w-lg rounded-t-[30px] sm:rounded-[30px] p-6 shadow-2xl transform transition-transform duration-300 flex flex-col max-h-[90vh]">
+            
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+            
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-900">Edit Review</h2>
+                <button type="button" id="cancelEdit" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="editForm" class="space-y-4 overflow-y-auto hide-scrollbar pb-safe-area-inset-bottom">
+                <input type="hidden" id="editReviewId">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Restaurant Name</label>
+                    <input type="text" id="editRestaurant" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium text-slate-700 placeholder-slate-400" placeholder="e.g. Kafe Inapan Siswa" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Food Name</label>
+                    <input type="text" id="editFood" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium text-slate-700 placeholder-slate-400" placeholder="e.g. Nasi Lemak" required>
+                </div>
+                
+                <div class="flex gap-4">
+                     <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Price (RM)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3.5 text-slate-400 font-medium">RM</span>
+                            <input type="number" id="editPrice" step="0.01" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium text-slate-700" placeholder="0.00" required>
+                        </div>
+                    </div>
+                     <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Rating</label>
+                        <div class="relative">
+                             <select id="editRating" class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium text-slate-700 appearance-none">
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Good</option>
+                                <option value="3">3 - Average</option>
+                                <option value="2">2 - Poor</option>
+                                <option value="1">1 - Terrible</option>
+                            </select>
+                            <div class="absolute right-4 top-3.5 pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Review</label>
+                    <textarea id="editReviewText" rows="4" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-medium text-slate-700 placeholder-slate-400 resize-none" placeholder="What did you think about the food?" required></textarea>
+                </div>
+                
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-primary text-white py-3.5 rounded-xl font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 active:scale-[0.98] transition-all">
+                        Update Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+const currentUser = localStorage.getItem("currentUser");
+if(!currentUser) window.location.href = "login.html";
+
+const reviewsContainer = document.getElementById("reviewsContainer");
+const emptyState = document.getElementById("emptyState");
+const editModal = document.getElementById("editModal");
+const editForm = document.getElementById("editForm");
+
+// Load reviews from PHP backend
+async function loadReviews() {
+  try {
+    const response = await fetch(`../my_reviews.php?user_id=${encodeURIComponent(currentUser)}`);
+    const data = await response.json();
+    
+    if (data.success && data.data && data.data.length > 0) {
+      reviewsContainer.innerHTML = '';
+      emptyState.classList.add('hidden');
+      
+      data.data.forEach(review => {
+        const card = createReviewCard(review);
+        reviewsContainer.appendChild(card);
+      });
+    } else {
+      reviewsContainer.innerHTML = '';
+      emptyState.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error loading reviews:', error);
+    reviewsContainer.innerHTML = '<div class="p-4 bg-red-50 text-red-500 rounded-xl text-center">Error loading reviews.</div>';
+  }
+}
+
+function createReviewCard(review) {
+  const card = document.createElement('article');
+  card.className = 'bg-white rounded-[22px] shadow-sm shadow-slate-200 border border-slate-100 overflow-hidden';
+  
+  const timeAgo = review.created_at ? moment(review.created_at).fromNow() : '';
+  let starHtml = '';
+  for(let i=0; i<5; i++) {
+     if(i < review.rating) starHtml += '<i class="fa-solid fa-star text-green-500 text-xs"></i>';
+     else starHtml += '<i class="fa-regular fa-star text-slate-300 text-xs"></i>';
+  }
+
+  card.innerHTML = `
+    <!-- Card Header -->
+    <div class="p-4 flex justify-between items-start border-b border-slate-50">
+        <div class="flex items-center gap-3">
+             <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-lg">
+                🍛
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 leading-tight">${escapeHtml(review.restaurant_name)}</h4>
+                <p class="text-xs text-slate-400 font-medium">${timeAgo}</p>
+            </div>
+        </div>
+         <div class="flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
+            ${starHtml}
+            <span class="text-sm font-bold text-green-700">${review.rating}.0</span>
+        </div>
+    </div>
+
+    <!-- Card Body -->
+    <div class="p-4 pt-3">
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold text-slate-800 leading-snug">${escapeHtml(review.food_name)}</h3>
+             <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200 whitespace-nowrap">RM ${parseFloat(review.price).toFixed(2)}</span>
+        </div>
+
+        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+            ${escapeHtml(review.review_text || 'No review text')}
+        </p>
+
+        ${review.photo_url ? `
+        <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden mb-4 relative">
+            <img src="../${review.photo_url}" alt="${escapeHtml(review.food_name)}" class="w-full h-full object-cover">
+        </div>` : ''}
+        
+         ${review.location ? `
+        <div class="flex items-center gap-2 text-xs text-slate-400 font-medium mb-1">
+            <i class="fa-solid fa-location-dot text-red-400"></i>
+            <span>${escapeHtml(review.location)}</span>
+        </div>` : ''}
+    </div>
+
+    <!-- Card Actions -->
+    <div class="px-4 py-3 bg-slate-50/80 border-t border-slate-100 flex gap-2">
+        <button onclick="editReview(${review.review_id})" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-slate-600 font-bold text-xs bg-white border border-slate-200 hover:bg-slate-50 active:scale-[0.98] transition-all">
+            <i class="fa-solid fa-pen text-slate-400"></i> Edit
+        </button>
+        <button onclick="deleteReview(${review.review_id})" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-rose-600 font-bold text-xs bg-white border border-rose-100 hover:bg-rose-50 active:scale-[0.98] transition-all">
+            <i class="fa-regular fa-trash-can"></i> Delete
+        </button>
+    </div>
+  `;
+  return card;
+}
+
+// Edit review
+async function editReview(reviewId) {
+  try {
+    const response = await fetch(`../my_reviews.php?user_id=${encodeURIComponent(currentUser)}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      const review = data.data.find(r => r.review_id === reviewId);
+      if (review) {
+        document.getElementById('editReviewId').value = review.review_id;
+        document.getElementById('editRestaurant').value = review.restaurant_name;
+        document.getElementById('editFood').value = review.food_name;
+        document.getElementById('editReviewText').value = review.review_text || '';
+        document.getElementById('editPrice').value = review.price;
+        document.getElementById('editRating').value = review.rating;
+        
+        editModal.classList.remove('hidden');
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching review:', error);
+    alert('Error loading review details');
+  }
+}
+
+// Handle edit form submission
+editForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const reviewId = document.getElementById('editReviewId').value;
+  const formData = new FormData();
+  formData.append('review_id', reviewId);
+  formData.append('restaurant_name', document.getElementById('editRestaurant').value);
+  formData.append('food_name', document.getElementById('editFood').value);
+  formData.append('review_text', document.getElementById('editReviewText').value);
+  formData.append('price', document.getElementById('editPrice').value);
+  formData.append('rating', document.getElementById('editRating').value);
+  
+  // Note: review_date is handled by DB automatically usually on update, or we can send current date
+   formData.append('review_date', moment().format('YYYY-MM-DD'));
+  
+  try {
+    const response = await fetch('../update_review.php', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      editModal.classList.add('hidden');
+      loadReviews();
+      // Show success toast? For now just alert or reload
+    } else {
+      alert('Error updating review: ' + data.message);
+    }
+  } catch (error) {
+    console.error('Error updating review:', error);
+    alert('Error updating review. Please try again.');
+  }
+});
+
+// Cancel edit
+document.getElementById('cancelEdit').addEventListener('click', () => {
+  editModal.classList.add('hidden');
+});
+
+// Delete review
+async function deleteReview(reviewId) {
+  if (!confirm('Are you sure you want to delete this review?')) {
+    return;
+  }
+  
+  const formData = new FormData();
+  formData.append('review_id', reviewId);
+  
+  try {
+    const response = await fetch('../delete_review.php', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      loadReviews();
+    } else {
+      alert('Error deleting review: ' + data.message);
+    }
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    alert('Error deleting review. Please try again.');
+  }
+}
+
+// Make functions global
+window.editReview = editReview;
+window.deleteReview = deleteReview;
+
+// Load reviews on page load
+loadReviews();
+</script>
+
+</body>
+</html>

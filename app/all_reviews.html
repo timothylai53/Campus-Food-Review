@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Reviews - UUM FoodHunt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#F97316',
+                        secondary: '#FDBA74',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased pb-24">
+
+    <!-- Sticky Header -->
+    <header class="fixed top-0 inset-x-0 bg-white/95 backdrop-blur-sm shadow-sm z-50 pt-safe-top">
+        <div class="px-6 py-4 flex items-center justify-between">
+             <a href="home.html" class="w-10 h-10 flex items-center justify-center rounded-full active:bg-slate-100 transition-colors">
+                <i class="fa-solid fa-arrow-left text-slate-600 text-lg"></i>
+            </a>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">All Reviews</h1>
+            <div class="w-10"></div> <!-- Spacer -->
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-5 mt-20 max-w-md mx-auto sm:max-w-xl md:max-w-2xl">
+
+        <!-- Reviews Feed Container -->
+        <div id="reviewsContainer" class="space-y-6">
+            <!-- Loading Skeleton -->
+            <div class="animate-pulse space-y-4">
+                <div class="h-64 bg-slate-200 rounded-2xl"></div>
+                <div class="h-64 bg-slate-200 rounded-2xl"></div>
+            </div>
+        </div>
+
+        <!-- End of Feed Marker -->
+        <div id="endMessage" class="hidden text-center py-10">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 text-slate-300 mb-3">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">No more reviews</p>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Fixed) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-50 rounded-t-[25px] pb-safe-area-inset-bottom">
+        <div class="flex justify-around items-end px-2 pb-3 pt-3">
+            
+            <!-- Home -->
+            <a href="home.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-primary transition-colors">
+                <div class="p-1">
+                    <i class="fa-solid fa-house text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+
+            <!-- Search -->
+            <a href="search_meal.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1 group-focus:scale-90">
+                    <i class="fa-solid fa-compass text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Explore</span>
+            </a>
+
+            <!-- FAB Button (Center) -->
+            <a href="create_review.html" class="relative -top-8 group">
+                <div class="w-16 h-16 bg-gradient-to-tr from-orange-500 to-rose-500 rounded-full shadow-xl shadow-orange-500/30 flex items-center justify-center text-white text-2xl transform transition-all duration-300 group-hover:scale-110 group-active:scale-95 border-[6px] border-slate-50">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </a>
+
+            <!-- Statistics -->
+            <a href="statistics.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1">
+                    <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Stats</span>
+            </a>
+
+            <!-- My Review -->
+            <a href="my_reviews.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1">
+                    <i class="fa-solid fa-user text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">My Review</span>
+            </a>
+
+        </div>
+    </nav>
+    
+    <div class="h-20"></div>
+
+<script>
+const currentUser = localStorage.getItem("currentUser");
+if(!currentUser) window.location.href = "login.html";
+
+const reviewsContainer = document.getElementById("reviewsContainer");
+const endMessage = document.getElementById("endMessage");
+
+// Load all reviews
+async function loadReviews() {
+  try {
+    const response = await fetch('../read_reviews.php');
+    const data = await response.json();
+    
+    if (data.success && data.data && data.data.length > 0) {
+      reviewsContainer.innerHTML = '';
+      
+      data.data.forEach(review => {
+        const card = createReviewCard(review);
+        reviewsContainer.appendChild(card);
+      });
+      endMessage.classList.remove('hidden');
+    } else {
+      reviewsContainer.innerHTML = '<p class="text-center text-slate-400 py-10">No reviews found.</p>';
+    }
+  } catch (error) {
+    console.error('Error loading reviews:', error);
+    reviewsContainer.innerHTML = '<p class="text-center text-red-400 py-10">Failed to load reviews.</p>';
+  }
+}
+
+function createReviewCard(review) {
+  const card = document.createElement('article');
+  card.className = 'bg-white rounded-[22px] shadow-md shadow-slate-200/50 border border-slate-50 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer';
+  card.onclick = () => window.location.href = `detail.html?id=${review.review_id}`;
+  
+  const timeAgo = review.created_at ? moment(review.created_at).fromNow() : '';
+  
+  // Font Awesome Stars
+  let starHtml = '';
+  for(let i=0; i<5; i++) {
+     if(i < review.rating) starHtml += '<i class="fa-solid fa-star text-green-500 text-xs"></i>';
+     else starHtml += '<i class="fa-regular fa-star text-slate-300 text-xs"></i>';
+  }
+
+  card.innerHTML = `
+    <!-- Card Header -->
+    <div class="p-4 flex justify-between items-center border-b border-slate-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-lg shadow-inner">
+                👤
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 leading-tight">${review.restaurant_name}</h4>
+                <p class="text-xs text-slate-400 font-medium">${timeAgo} • ${review.user_id}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
+            ${starHtml}
+            <span class="text-sm font-bold text-green-700">${review.rating}.0</span>
+        </div>
+    </div>
+
+    <!-- Card Body -->
+    <div class="p-4 pt-3">
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold text-slate-800 leading-snug">${review.food_name}</h3>
+            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200">RM ${parseFloat(review.price).toFixed(2)}</span>
+        </div>
+
+        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+            ${review.review_text || 'No review text'}
+        </p>
+
+        ${review.photo_url ? `
+        <div class="w-full h-48 bg-slate-100 rounded-2xl overflow-hidden mb-4 relative shadow-sm group">
+            <img src="../${review.photo_url}" alt="${review.food_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        </div>` : ''}
+
+        ${review.location ? `
+        <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+            <i class="fa-solid fa-location-dot text-red-400"></i>
+            <span>${review.location}</span>
+        </div>` : ''}
+    </div>
+  `;
+  return card;
+}
+
+loadReviews();
+</script>
+
+</body>
+</html>

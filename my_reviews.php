@@ -1,18 +1,13 @@
 <?php
 /**
- * Read Reviews - Fetch all reviews
- * Returns all records ordered by date (newest first)
+ * My Reviews - Fetch reviews for a specific user
+ * Accepts user_id from GET parameter
  */
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$current_user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : '';
 
 require_once 'db_connect.php';
 
@@ -23,23 +18,35 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
+// Get user_id from query parameter
+$user_id = isset($_GET['user_id']) ? trim($_GET['user_id']) : null;
+
+if (empty($user_id)) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => 'user_id parameter is required'
+    ]);
+    exit();
+}
+
 try {
-    // Prepare SQL query to fetch all reviews ordered by date (newest first)
-    $sql = "SELECT r.review_id, r.user_id, r.restaurant_name, r.food_name, r.review_text, r.price, r.rating, r.location, r.review_date, r.created_at, r.photo_path,
-            (SELECT COUNT(*) FROM review_likes WHERE review_id = r.review_id) as likes_count,
-            (SELECT COUNT(*) FROM review_likes WHERE review_id = r.review_id AND user_id = ?) as is_liked,
-            (SELECT COUNT(*) FROM review_comments WHERE review_id = r.review_id) as comments_count
-            FROM reviews r
-            ORDER BY r.review_date DESC, r.review_id DESC";
+    
+    // Prepare SQL query to fetch reviews for current user
+    $sql = "SELECT review_id, user_id, restaurant_name, food_name, review_text, price, rating, location, review_date, created_at, photo_path 
+            FROM reviews 
+            WHERE user_id = ?
+            ORDER BY review_date DESC, review_id DESC";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $current_user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if (!$result) {
+    
+    if (!$stmt) {
         throw new Exception('Database error: ' . $conn->error);
     }
+    
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     $reviews = [];
     
@@ -57,12 +64,11 @@ try {
             'review_date' => $row['review_date'],
             'created_at' => $row['created_at'],
             'photo_path' => $row['photo_path'],
-            'photo_url' => $row['photo_path'] ? 'uploads/' . $row['photo_path'] : null,
-            'likes_count' => (int)$row['likes_count'],
-            'is_liked' => (bool)$row['is_liked'],
-            'comments_count' => (int)$row['comments_count']
+            'photo_url' => $row['photo_path'] ? 'uploads/' . $row['photo_path'] : null
         ];
     }
+
+    $stmt->close();
 
     http_response_code(200);
     echo json_encode([

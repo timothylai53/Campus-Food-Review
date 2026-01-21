@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUM FoodHunt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#F97316', // Orange-500
+                        secondary: '#FDBA74', // Orange-300
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased pb-24">
+
+    <!-- Sticky Top Header -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm px-5 py-4 flex justify-between items-center transition-all duration-300">
+        <div class="flex items-center gap-2">
+            <div class="bg-primary/10 p-2 rounded-xl">
+                <i class="fa-solid fa-utensils text-primary text-xl"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">UUM <span class="text-primary">FoodHunt</span></h1>
+        </div>
+        <a href="settings.html" class="relative group">
+            <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden">
+                <img src="https://ui-avatars.com/api/?name=User&background=F97316&color=fff" alt="Profile" class="w-full h-full object-cover">
+            </div>
+            <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-5 mt-6 max-w-md mx-auto sm:max-w-xl md:max-w-2xl">
+        
+        <!-- Welcome Message -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-slate-800">Hungry? 😋</h2>
+            <p class="text-slate-500">Find the best food on campus.</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative group mb-8">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fa-solid fa-search text-slate-400 group-focus-within:text-primary transition-colors"></i>
+            </div>
+            <input type="text" 
+                   class="block w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white border-none shadow-sm ring-1 ring-slate-100 focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-slate-400 text-sm" 
+                   placeholder="Search for nasi lemak, cafe..."
+                   onclick="window.location.href='search_meal.html'">
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                 <button class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-primary transition-colors">
+                    <i class="fa-solid fa-sliders"></i>
+                 </button>
+            </div>
+        </div>
+
+        <!-- Categories (Horizontal Scroll) -->
+        <div class="flex gap-3 overflow-x-auto hide-scrollbar mb-8 pb-2 -mx-5 px-5">
+            <button class="flex-shrink-0 bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-orange-500/30 whitespace-nowrap active:scale-95 transition-transform">
+                🔥 Trending
+            </button>
+            <button class="flex-shrink-0 bg-white text-slate-600 px-5 py-2.5 rounded-full text-sm font-medium shadow-sm hover:bg-slate-50 border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
+                🍚 Asian
+            </button>
+            <button class="flex-shrink-0 bg-white text-slate-600 px-5 py-2.5 rounded-full text-sm font-medium shadow-sm hover:bg-slate-50 border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
+                🍔 Western
+            </button>
+            <button class="flex-shrink-0 bg-white text-slate-600 px-5 py-2.5 rounded-full text-sm font-medium shadow-sm hover:bg-slate-50 border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
+                ☕ Beverages
+            </button>
+        </div>
+
+        <!-- Section Title -->
+        <div class="flex justify-between items-end mb-4">
+            <h3 class="text-lg font-bold text-slate-900">Recent Reviews</h3>
+            <a href="all_reviews.html" class="text-sm text-primary font-medium hover:underline">See All</a>
+        </div>
+
+        <!-- Reviews Feed Container -->
+        <div class="space-y-6">
+            
+            <!-- PHP Loop Start Marker -->
+            <!-- REPLACE THIS COMMENT WITH YOUR PHP LOOP: <?php foreach($reviews as $review): ?> -->
+
+            <!-- Card Design Start -->
+            <article class="bg-white rounded-[22px] shadow-md shadow-slate-200/50 border border-slate-50 overflow-hidden hover:shadow-lg transition-all duration-300">
+                
+                <!-- Card Header -->
+                <div class="p-4 flex justify-between items-center border-b border-slate-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-lg shadow-inner">
+                            👤
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 leading-tight">Cafe Petronas</h4>
+                            <p class="text-xs text-slate-400 font-medium">2 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
+                        <i class="fa-solid fa-star text-green-500 text-xs"></i>
+                        <span class="text-sm font-bold text-green-700">5.0</span>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-4 pt-3">
+                     <!-- Food Name & Price -->
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-bold text-slate-800 leading-snug">Nasi Lemak Ayam Berempah</h3>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200">RM 7.50</span>
+                    </div>
+
+                    <!-- Review Text -->
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Absolutely delicious! The sambal was spicy but sweet, just how I like it. The chicken was crispy on the outside. Highly recommended!
+                    </p>
+
+                    <!-- Image (Conditional) -->
+                    <div class="w-full h-48 bg-slate-100 rounded-2xl overflow-hidden mb-4 relative shadow-sm group">
+                         <!-- Use a placeholder or actual image variable -->
+                         <div class="absolute inset-0 bg-slate-200 flex items-center justify-center text-slate-400">
+                             <i class="fa-solid fa-image text-3xl"></i>
+                         </div>
+                        <img src="https://images.unsplash.com/photo-1626074353765-517a681e40be?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Food" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+
+                    <!-- Location Tag -->
+                    <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                        <i class="fa-solid fa-location-dot text-red-400"></i>
+                        <span>Bukit Kachi, Kubang Pasu</span>
+                    </div>
+                </div>
+
+                <!-- Card Actions -->
+                <div class="px-5 py-3.5 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center text-slate-500">
+                    <button class="flex items-center gap-2 hover:text-red-500 transition-colors group active:scale-95">
+                        <i class="fa-regular fa-heart group-hover:bg-red-50 p-1.5 -ml-1.5 rounded-full transition-all text-lg"></i>
+                        <span class="text-xs font-bold group-hover:text-red-600">Like</span>
+                    </button>
+                    <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group active:scale-95">
+                        <i class="fa-regular fa-comment group-hover:bg-blue-50 p-1.5 -ml-1.5 rounded-full transition-all text-lg"></i>
+                        <span class="text-xs font-bold group-hover:text-blue-600">Comment</span>
+                    </button>
+                    <button class="flex items-center gap-2 hover:text-slate-800 transition-colors group active:scale-95">
+                        <i class="fa-solid fa-share group-hover:bg-slate-200 p-1.5 -mr-1.5 rounded-full transition-all text-lg"></i>
+                    </button>
+                </div>
+
+            </article>
+            <!-- Card Design End -->
+
+            <!-- PHP Loop End Marker -->
+            <!-- REPLACE THIS COMMENT WITH YOUR PHP LOOP END: <?php endforeach; ?> -->
+
+        </div>
+
+        <!-- End of Feed Marker -->
+        <div class="text-center py-10">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 text-slate-300 mb-3">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">You're all caught up!</p>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Fixed) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-50 rounded-t-[25px] pb-safe-area-inset-bottom">
+        <div class="flex justify-around items-end px-2 pb-3 pt-3">
+            
+            <!-- Home (Active) -->
+            <a href="home.html" class="flex flex-col items-center gap-1 w-16 group">
+                <div class="relative p-1">
+                    <i class="fa-solid fa-house text-xl text-primary transition-colors duration-200"></i>
+                    <span class="absolute -bottom-2 lg:bottom-auto lg:top-1/2 lg:-left-2 w-1 h-1 bg-primary rounded-full mx-auto left-0 right-0"></span>
+                </div>
+                <span class="text-[10px] font-bold text-primary">Home</span>
+            </a>
+
+            <!-- Search -->
+            <a href="search_meal.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1 group-focus:scale-90">
+                    <i class="fa-solid fa-compass text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Explore</span>
+            </a>
+
+            <!-- FAB Button (Center) -->
+            <a href="create_review.html" class="relative -top-8 group">
+                <div class="w-16 h-16 bg-gradient-to-tr from-orange-500 to-rose-500 rounded-full shadow-xl shadow-orange-500/30 flex items-center justify-center text-white text-2xl transform transition-all duration-300 group-hover:scale-110 group-active:scale-95 border-[6px] border-slate-50">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </a>
+
+            <!-- Statistics -->
+            <a href="statistics.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1">
+                    <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Stats</span>
+            </a>
+
+            <!-- Profile -->
+            <a href="my_reviews.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1">
+                    <i class="fa-solid fa-user text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Profile</span>
+            </a>
+
+        </div>
+    </nav>
+    
+    <!-- Safe Area Padding for Mobile Bottom Nav -->
+    <div class="h-20"></div>
+
+</body>
+</html>

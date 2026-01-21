@@ -9,6 +9,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+require_once 'check_session.php'; // Ensure user is logged in
 require_once 'db_connect.php';
 
 // Handle preflight requests
@@ -26,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 try {
     // Validate required fields
-    $required_fields = ['restaurant_name', 'food_name', 'price', 'rating', 'review_date'];
+    $required_fields = ['restaurant_name', 'food_name', 'review_text', 'price', 'rating', 'review_date'];
     foreach ($required_fields as $field) {
         if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
             throw new Exception("Field '{$field}' is required");
@@ -34,11 +35,14 @@ try {
     }
 
     // Sanitize and validate input
+    $user_id = $_SESSION['user_id']; // Use secure session user_id
     $restaurant_name = trim($_POST['restaurant_name']);
     $food_name = trim($_POST['food_name']);
-    $price = filter_var($_POST['price'], FILTER_VALIDATE_INT);
+    $review_text = trim($_POST['review_text']);
+    $price = filter_var($_POST['price'], FILTER_VALIDATE_FLOAT);
     $rating = filter_var($_POST['rating'], FILTER_VALIDATE_INT);
     $review_date = trim($_POST['review_date']);
+    $location = isset($_POST['location']) ? trim($_POST['location']) : null;
 
     // Validate price
     if ($price === false || $price < 0) {
@@ -96,8 +100,8 @@ try {
     }
 
     // Prepare SQL statement
-    $sql = "INSERT INTO reviews (restaurant_name, food_name, price, rating, review_date, photo_path) 
-            VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO reviews (user_id, restaurant_name, food_name, review_text, price, rating, location, review_date, photo_path) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
     
@@ -105,7 +109,7 @@ try {
         throw new Exception('Database error: ' . $conn->error);
     }
 
-    $stmt->bind_param('ssiiss', $restaurant_name, $food_name, $price, $rating, $review_date, $photo_path);
+    $stmt->bind_param('ssssdisss', $user_id, $restaurant_name, $food_name, $review_text, $price, $rating, $location, $review_date, $photo_path);
 
     if ($stmt->execute()) {
         $review_id = $stmt->insert_id;
@@ -116,10 +120,13 @@ try {
             'message' => 'Review created successfully',
             'data' => [
                 'review_id' => $review_id,
+                'user_id' => $user_id,
                 'restaurant_name' => $restaurant_name,
                 'food_name' => $food_name,
+                'review_text' => $review_text,
                 'price' => $price,
                 'rating' => $rating,
+                'location' => $location,
                 'review_date' => $review_date,
                 'photo_path' => $photo_path
             ]

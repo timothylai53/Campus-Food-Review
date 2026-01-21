@@ -9,6 +9,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, PUT');
 header('Access-Control-Allow-Headers: Content-Type');
 
+require_once 'check_session.php'; // Ensure user is logged in
 require_once 'db_connect.php';
 
 // Handle preflight requests
@@ -36,14 +37,23 @@ try {
         throw new Exception('Invalid review ID');
     }
 
-    // Check if review exists
-    $check_sql = "SELECT review_id, photo_path FROM reviews WHERE review_id = ?";
+    // Check if review exists and user owns it
+    $check_sql = "SELECT review_id, photo_path FROM reviews WHERE review_id = ? AND user_id = ?";
     $check_stmt = $conn->prepare($check_sql);
-    $check_stmt->bind_param('i', $review_id);
+    $current_user_id = $_SESSION['user_id'];
+    $check_stmt->bind_param('is', $review_id, $current_user_id);
     $check_stmt->execute();
     $result = $check_stmt->get_result();
 
     if ($result->num_rows === 0) {
+         // Check if review exists but belongs to someone else
+         $exist_sql = "SELECT review_id FROM reviews WHERE review_id = ?";
+         $exist_stmt = $conn->prepare($exist_sql);
+         $exist_stmt->bind_param('i', $review_id);
+         $exist_stmt->execute();
+         if($exist_stmt->get_result()->num_rows > 0) {
+             throw new Exception('Unauthorized: You can only update your own reviews');
+         }
         throw new Exception('Review not found');
     }
 
@@ -68,14 +78,20 @@ try {
         $param_types .= 's';
     }
 
+    if (isset($_POST['review_text']) && !empty(trim($_POST['review_text']))) {
+        $update_fields[] = 'review_text = ?';
+        $params[] = trim($_POST['review_text']);
+        $param_types .= 's';
+    }
+
     if (isset($_POST['price'])) {
-        $price = filter_var($_POST['price'], FILTER_VALIDATE_INT);
+        $price = filter_var($_POST['price'], FILTER_VALIDATE_FLOAT);
         if ($price === false || $price < 0) {
             throw new Exception('Invalid price value');
         }
         $update_fields[] = 'price = ?';
         $params[] = $price;
-        $param_types .= 'i';
+        $param_types .= 'd';
     }
 
     if (isset($_POST['rating'])) {
@@ -86,6 +102,12 @@ try {
         $update_fields[] = 'rating = ?';
         $params[] = $rating;
         $param_types .= 'i';
+    }
+
+    if (isset($_POST['location'])) {
+        $update_fields[] = 'location = ?';
+        $params[] = trim($_POST['location']);
+        $param_types .= 's';
     }
 
     if (isset($_POST['review_date']) && !empty(trim($_POST['review_date']))) {

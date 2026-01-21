@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - UUM FoodHunt</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F97316">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#F97316', // Orange-500
+                        secondary: '#FDBA74', // Orange-300
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .pb-safe-area-inset-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased pb-24">
+
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm px-5 py-4 transition-all duration-300">
+        <h1 class="text-xl font-bold tracking-tight text-slate-900">Food Trends 📊</h1>
+    </header>
+
+    <main class="px-5 mt-6 max-w-md mx-auto sm:max-w-xl md:max-w-2xl bg-slate-50 min-h-screen">
+        
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center">
+                <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-primary mb-2">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Reviews</p>
+                <p id="totalReviews" class="text-2xl font-bold text-slate-800">0</p>
+            </div>
+             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center">
+                <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500 mb-2">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Avg Rating</p>
+                <p id="avgRating" class="text-2xl font-bold text-slate-800">0</p>
+            </div>
+             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center">
+                <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 mb-2">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Places</p>
+                <p id="totalRestaurants" class="text-2xl font-bold text-slate-800">0</p>
+            </div>
+             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center">
+                <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 mb-2">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Avg Price</p>
+                <p id="avgPrice" class="text-2xl font-bold text-slate-800">0</p>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            
+            <!-- Rating Chart -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-primary"></i> Rating Distribution
+                </h3>
+                <canvas id="ratingChart"></canvas>
+            </div>
+
+            <!-- Top Restaurants -->
+             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-award text-primary"></i> Top Restaurants
+                </h3>
+                <canvas id="restaurantChart"></canvas>
+            </div>
+
+            <!-- Timeline -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-trend-up text-primary"></i> Reviews Trend
+                </h3>
+                <canvas id="timelineChart"></canvas>
+            </div>
+
+            <!-- Price -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                 <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-money-bill-1-wave text-primary"></i> Price Range
+                </h3>
+                <canvas id="priceChart"></canvas>
+            </div>
+
+            <!-- Most Reviewed Foods (Leaderboard Style) -->
+            <div>
+                 <h3 class="font-bold text-slate-800 mb-4 px-2">Most Reviewed Foods 🍛</h3>
+                <div id="topFoodsList" class="space-y-3">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Fixed) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-50 rounded-t-[25px] pb-safe-area-inset-bottom">
+        <div class="flex justify-around items-end px-2 pb-3 pt-3">
+            
+            <!-- Home -->
+            <a href="home.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1 group-focus:scale-90">
+                    <i class="fa-solid fa-house text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+
+            <!-- Search -->
+            <a href="search_meal.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1 group-focus:scale-90">
+                    <i class="fa-solid fa-compass text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">Explore</span>
+            </a>
+
+            <!-- FAB Button (Center) -->
+            <a href="create_review.html" class="relative -top-8 group">
+                <div class="w-16 h-16 bg-gradient-to-tr from-orange-500 to-rose-500 rounded-full shadow-xl shadow-orange-500/30 flex items-center justify-center text-white text-2xl transform transition-all duration-300 group-hover:scale-110 group-active:scale-95 border-[6px] border-slate-50">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </a>
+
+            <!-- Statistics (Active) -->
+             <a href="statistics.html" class="flex flex-col items-center gap-1 w-16 group">
+                <div class="relative p-1">
+                    <i class="fa-solid fa-chart-pie text-xl text-primary transition-colors duration-200"></i>
+                    <span class="absolute -bottom-2 lg:bottom-auto lg:top-1/2 lg:-left-2 w-1 h-1 bg-primary rounded-full mx-auto left-0 right-0"></span>
+                </div>
+                <span class="text-[10px] font-bold text-primary">Stats</span>
+            </a>
+
+            <!-- My Review -->
+            <a href="my_reviews.html" class="flex flex-col items-center gap-1 w-16 group text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1">
+                    <i class="fa-solid fa-user text-xl mb-0.5"></i>
+                </div>
+                <span class="text-[10px] font-medium">My Review</span>
+            </a>
+
+        </div>
+    </nav>
+    
+    <!-- Safe Area Padding -->
+    <div class="h-20"></div>
+
+<script>
+const currentUser = localStorage.getItem("currentUser");
+if(!currentUser) window.location.href = "login.html";
+
+let ratingChart, restaurantChart, timelineChart, priceChart;
+
+// Chart Colors
+const colors = {
+    primary: '#F97316', // Orange-500
+    primaryLight: 'rgba(249, 115, 22, 0.2)',
+    success: '#22c55e',
+    info: '#3b82f6',
+    warning: '#eab308',
+    danger: '#ef4444',
+    purple: '#a855f7'
+};
+
+// Load statistics
+async function loadStatistics() {
+  try {
+    const response = await fetch('../read_reviews.php');
+    if (!response.ok) throw new Error('Network response was not ok');
+    
+    const data = await response.json();
+    
+    if (data.success && data.data && data.data.length > 0) {
+      const reviews = data.data;
+      
+      // Calculate basic stats
+      const totalReviews = reviews.length;
+      
+      // Filter valid ratings
+      const validRatings = reviews.filter(r => r.rating && !isNaN(r.rating) && r.rating > 0);
+      const avgRating = validRatings.length > 0 
+        ? (validRatings.reduce((sum, r) => sum + parseInt(r.rating), 0) / validRatings.length).toFixed(1) 
+        : "0.0";
+        
+      const uniqueRestaurants = [...new Set(reviews.filter(r => r.restaurant_name).map(r => r.restaurant_name))].length;
+      
+      const avgPrice = (reviews.reduce((sum, r) => sum + parseFloat(r.price || 0), 0) / totalReviews).toFixed(2);
+      
+      // Update stat cards
+      animateValue('totalReviews', 0, totalReviews, 1000);
+      document.getElementById('avgRating').textContent = avgRating;
+      animateValue('totalRestaurants', 0, uniqueRestaurants, 1000);
+      document.getElementById('avgPrice').textContent = 'RM ' + avgPrice;
+      
+      // Create charts
+      createRatingChart(reviews);
+      createRestaurantChart(reviews);
+      createTimelineChart(reviews);
+      createPriceChart(reviews);
+      createTopFoodsList(reviews);
+    } else {
+       // Keep minimal state or show empty
+       document.querySelector('main').innerHTML = `
+        <div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 mb-4 text-2xl">
+                <i class="fa-solid fa-chart-simple"></i>
+            </div>
+            <p class="text-slate-500 font-medium">No stats available yet.</p>
+            <a href="create_review.html" class="mt-4 text-primary font-bold hover:underline">Write a review</a>
+        </div>
+        `;
+    }
+  } catch (error) {
+    console.error('Error loading statistics:', error);
+    // document.querySelector('main').innerHTML = `<p class="text-center text-red-500 mt-10">Failed to load statistics: ${error.message}</p>`;
+  }
+}
+
+function animateValue(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+
+// Rating Distribution Chart
+function createRatingChart(reviews) {
+  const ratingCounts = [0, 0, 0, 0, 0];
+  reviews.forEach(r => {
+      const val = parseInt(r.rating);
+      if(val >= 1 && val <= 5) {
+          ratingCounts[val - 1]++;
+      }
+  });
+  
+  const ctx = document.getElementById('ratingChart').getContext('2d');
+  ratingChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['1 ⭐', '2 ⭐', '3 ⭐', '4 ⭐', '5 ⭐'],
+      datasets: [{
+        label: 'Reviews',
+        data: ratingCounts,
+        backgroundColor: [
+          colors.danger, colors.warning, '#fbbf24', '#84cc16', colors.success // Gradient from red to greenish
+        ],
+        borderRadius: 8,
+        barThickness: 20
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { display: false } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// Top Restaurants Chart
+function createRestaurantChart(reviews) {
+  const restaurantStats = {};
+  reviews.forEach(r => {
+    if (!restaurantStats[r.restaurant_name]) {
+      restaurantStats[r.restaurant_name] = { total: 0, count: 0 };
+    }
+    restaurantStats[r.restaurant_name].total += r.rating;
+    restaurantStats[r.restaurant_name].count++;
+  });
+  
+  const restaurants = Object.entries(restaurantStats)
+    .map(([name, stats]) => ({ name, avg: stats.total / stats.count }))
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, 5);
+  
+  const ctx = document.getElementById('restaurantChart').getContext('2d');
+  restaurantChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: restaurants.map(r => r.name),
+      datasets: [{
+        label: 'Rating',
+        data: restaurants.map(r => r.avg.toFixed(1)),
+        backgroundColor: [colors.primary, '#fdba74', '#fed7aa', '#ffedd5', '#fff7ed'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '70%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }
+      }
+    }
+  });
+}
+
+// Reviews Timeline Chart
+function createTimelineChart(reviews) {
+  const monthlyData = {};
+  reviews.forEach(r => {
+    if(r.review_date) {
+        const month = moment(r.review_date).format('MMM YYYY');
+        if(month !== "Invalid date") {
+            monthlyData[month] = (monthlyData[month] || 0) + 1;
+        }
+    }
+  });
+  
+  const sortedMonths = Object.keys(monthlyData).sort((a, b) => 
+    moment(a, 'MMM YYYY').valueOf() - moment(b, 'MMM YYYY').valueOf()
+  );
+  
+  const ctx = document.getElementById('timelineChart').getContext('2d');
+  timelineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sortedMonths,
+      datasets: [{
+        label: 'Reviews',
+        data: sortedMonths.map(m => monthlyData[m]),
+        borderColor: colors.primary,
+        backgroundColor: colors.primaryLight,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: colors.primary,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// Price Distribution Chart
+function createPriceChart(reviews) {
+  const priceRanges = {
+    'RM 0-5': 0, 'RM 6-10': 0, 'RM 11-15': 0, 'RM 16-20': 0, 'RM 20+': 0
+  };
+  
+  reviews.forEach(r => {
+    const price = parseFloat(r.price);
+    if (price <= 5) priceRanges['RM 0-5']++;
+    else if (price <= 10) priceRanges['RM 6-10']++;
+    else if (price <= 15) priceRanges['RM 11-15']++;
+    else if (price <= 20) priceRanges['RM 16-20']++;
+    else priceRanges['RM 20+']++;
+  });
+  
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  priceChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(priceRanges),
+      datasets: [{
+        data: Object.values(priceRanges),
+        backgroundColor: [colors.success, '#84cc16', colors.warning, colors.primary, colors.danger],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }
+      }
+    }
+  });
+}
+
+// Top Foods List
+function createTopFoodsList(reviews) {
+  const foodCounts = {};
+  reviews.forEach(r => {
+    foodCounts[r.food_name] = (foodCounts[r.food_name] || 0) + 1;
+  });
+  
+  const topFoods = Object.entries(foodCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  
+  const container = document.getElementById('topFoodsList');
+  container.innerHTML = topFoods.map(([food, count], index) => `
+    <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+      <div class="flex items-center gap-4">
+        <div class="w-8 h-8 rounded-full ${index < 3 ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500'} flex items-center justify-center font-bold text-sm">
+            ${index + 1}
+        </div>
+        <span class="font-bold text-slate-700 text-sm">${food}</span>
+      </div>
+      <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">${count} Review${count > 1 ? 's' : ''}</span>
+    </div>
+  `).join('');
+}
+
+// Load data on page load
+loadStatistics();
+</script>
+
+</body>
+</html>
